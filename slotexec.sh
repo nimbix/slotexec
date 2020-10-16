@@ -56,10 +56,14 @@ done
 nnodes=0
 nslots=0
 while read n; do
-    nnodes=`expr $nnodes + 1`
+    if [ -n "$n" ]; then
+        nnodes=`expr $nnodes + 1`
+    fi
 done <$nodefile
 while read s; do
-    nslots=`expr $nslots + 1`
+    if [ -n "$s" ]; then
+        nslots=`expr $nslots + 1`
+    fi
 done <$slotfile
 slotsper=`expr $nslots / $nnodes`
 
@@ -71,13 +75,16 @@ if [ $execmode = global ]; then
     # global mode; ssh test up to timeout first, then spawn on each node and wait for finishes
     now=`date +%s`
     timeout=`expr $now + $timeout`
+    hostname=$(hostname)
     while [ 1 ]; do
-        failures=0
+        failed=false
         while read n; do
-            ssh -o ConnectTimeout=1 $n /bin/true 2>/dev/null
-            failures=`expr $failures + $?`
+            if [ $failed = false -a -n "$n" -a "$n" != "$hostname" ]; then
+                ssh -o BatchMode=yes -o ConnectTimeout=1 $n /bin/true 2>/dev/null </dev/null
+                [ $? -ne 0 ] && failed=true
+            fi
         done <$nodefile
-        if [ $failures -eq 0 ]; then
+        if [ $failed = "false" ]; then
             break
         else
             if [ $(date +%s) -lt $timeout ]; then
@@ -91,7 +98,11 @@ if [ $execmode = global ]; then
 
     srpath=$(echo "$(cd "$(dirname "$0")"; pwd)/$(basename "$0")")
     while read n; do
-        ssh $n $srpath -l -n $nodefile -s $slotfile -a $arraybase "$@" &
+        if [ "$n" = "$hostname" ]; then
+            $srpath -l -n $nodefile -s $slotfile -a $arraybase "$@" </dev/null &
+        elif [ -n "$n" ]; then
+            ssh -o BatchMode=yes $n $srpath -l -n $nodefile -s $slotfile -a $arraybase "$@" </dev/null &
+        fi
         arraybase=`expr $arraybase + $slotsper`
     done <$nodefile
     set -e
