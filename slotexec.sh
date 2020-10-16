@@ -4,7 +4,7 @@
 usage()
 {
     [ -n "$1" ] && echo $0: "$*" >&2
-    echo "usage: $0 <-g|-l> [-n nodefile] [-s slotfile] [-a arraybase] <command...>" >&2
+    echo "usage: $0 <-g|-l> [-n nodefile] [-s slotfile] [-a arraybase] [-t timeout ] <command...>" >&2
     echo "  one of -g or -l must be specified" >&2
     exit 1
 }
@@ -12,6 +12,7 @@ usage()
 # defaults
 nodefile=/etc/JARVICE/nodes
 slotfile=/etc/JARVICE/cores
+timeout=60
 arraybase=
 execmode=
 
@@ -36,6 +37,10 @@ while [ -n "$1" ]; do
             ;;
         -a)
             [ -n "$2" -a "$2" -eq "$2" ] && arraybase=$2 || usage
+            shift
+            ;;
+        -t)
+            [ -n "$2" -a "$2" -eq "$2" ] && timeout=$2 || usage
             shift
             ;;
         *)
@@ -63,7 +68,27 @@ slotsper=`expr $nslots / $nnodes`
 
 if [ $execmode = global ]; then
 
-    # global mode; spawn on each node and wait for finishes
+    # global mode; ssh test up to timeout first, then spawn on each node and wait for finishes
+    now=`date +%s`
+    timeout=`expr $now + $timeout`
+    while [ 1 ]; do
+        failures=0
+        while read n; do
+            ssh -o ConnectTimeout=1 $n /bin/true 2>/dev/null
+            failures=`expr $failures + $?`
+        done <$nodefile
+        if [ $failures -eq 0 ]; then
+            break
+        else
+            if [ $(date +%s) -lt $timeout ]; then
+                sleep 1
+            else
+                echo "Timed out waiting for nodes to be ready" >&2
+                exit 1
+            fi
+        fi
+    done
+
     srpath=$(echo "$(cd "$(dirname "$0")"; pwd)/$(basename "$0")")
     while read n; do
         ssh $n $srpath -l -n $nodefile -s $slotfile -a $arraybase "$@" &
