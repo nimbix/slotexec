@@ -11,6 +11,7 @@ COPY init.sh /sbin/init
 
 # Sample AppDef - see https://jarvice.readthedocs.io/en/latest/appdef/
 COPY AppDef.json /etc/NAE/AppDef.json
+RUN curl --fail -X POST -d @/etc/NAE/AppDef.json https://api.jarvice.com/jarvice/validate
 
 # JARVICE XE pull optimization - see https://jarvice.readthedocs.io/en/latest/docker/#best-practices
 RUN mkdir -p /etc/NAE && touch /etc/NAE/{screenshot.png,screenshot.txt,license.txt,AppDef.json}
