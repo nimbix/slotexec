@@ -1,7 +1,7 @@
 FROM centos:8
 
 # install ssh and sshd for multi-node operation; note that passwd is required by JARVICE runtime to be in the container
-RUN yum -y install passwd openssh openssh-server && yum clean all
+RUN yum -y install passwd openssh-clients openssh-server && yum clean all
 COPY slotexec.sh /usr/local/bin/slotexec.sh
 
 # sample script to run on all slots
