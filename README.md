@@ -1,6 +1,8 @@
 # slotexec
 Cluster slot exec mechanism and examples for JARVICE; sample container at [jarvice/slotexec](https://hub.docker.com/r/jarvice/slotexec)
 
+This mechanism is best suited for "perfectly parallel" applications, and the example demonstrates a minimal container with secure setup between parallel nodes.  It is compatible with JARVICE on the Nimbix Cloud, or JARVICE XE on any infrastructure.  For tightly-coupled parallel solvers it is best practice to use MPI-based mechanisms instead.
+
 # Usage example (JSON)
 
 Assumes:
