@@ -1,0 +1,47 @@
+{
+    "name": "slotexec demo",
+    "description": "Demo app for slotexec",
+    "author": "Nimbix, Inc.",
+    "licensed": true,
+    "classifications": [
+        "Demo"
+    ],
+    "machines": [
+        "*"
+    ],
+    "vault-types": [
+        "FILE",
+        "BLOCK",
+        "BLOCK_ARRAY",
+        "OBJECT"
+    ],
+    "commands": {
+        "slotexec": {
+            "path": "/usr/local/bin/slotexec.sh",
+            "interactive": false,
+            "name": "slotexec",
+            "description": "Runs jobscript.sh on every execution slot for this job.",
+            "parameters": {
+                "global": {
+                    "name": "global",
+                    "type": "CONST",
+                    "value": "-g",
+                    "required": true,
+                    "positional": true
+                },
+                "jobscript": {
+                    "name": "jobscript",
+                    "type": "CONST",
+                    "value": "/usr/local/bin/jobscript.sh",
+                    "required": true,
+                    "positional": true
+                }
+            },
+            "interactive": false
+        }
+    },
+    "image": {
+        "type": "image/png",
+        "data": ""
+    }
+}
