@@ -1,5 +1,5 @@
 # slotexec
-Cluster slot exec mechanism and examples for JARVICE
+Cluster slot exec mechanism and examples for JARVICE; sample container at [jarvice/slotexec](https://hub.docker.com/r/jarvice/slotexec)
 
 # Usage example (JSON)
 
